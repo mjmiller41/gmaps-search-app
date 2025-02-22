@@ -125,3 +125,5 @@ This Node.js application searches for places (e.g., sushi restaurants) near US Z
 ## Notes
 - This app processes 41,929 US ZIP codes, finding places (e.g., sushi restaurants) within a 50 km radius, storing results in RDS, and staying within Free Tier limits (EC2: 750 hours/month, RDS: 20 GB storage).
 - Keep `.env` secure and exclude it from Git.
+
+<!-- test comment for git push -->

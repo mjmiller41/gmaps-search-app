@@ -1,6 +1,7 @@
 node_modules/
 *.log
 .env
+package-lock.json
 gmap-search-key.pem
 zip_code_database.csv
 zipCodeCsvToDb.js

@@ -218,4 +218,3 @@ searchPlaces()
   .finally(() => {
     console.log('Script finished.');
   });
-// Test deployment - do not run yet
