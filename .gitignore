@@ -5,5 +5,3 @@ gmap-search-key.pem
 zip_code_database.csv
 zipCodeCsvToDb.js
 data.json
-package-lock.json
-package.json
