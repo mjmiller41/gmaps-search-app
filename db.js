@@ -1,6 +1,8 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 
+// Fallback to relative for local
+const caPath = process.env.RDS_CA_PATH || './rds-ca-bundle.pem';
 const pool = new Pool({
   host: process.env.RDS_ENDPOINT,
   database: process.env.RDS_DATABASE,
@@ -8,7 +10,7 @@ const pool = new Pool({
   password: process.env.RDS_PASSWORD,
   port: 5432,
   ssl: {
-    ca: fs.readFileSync('./rds-ca-bundle.pem').toString(),
+    ca: fs.readFileSync(caPath).toString(),
     rejectUnauthorized: true
   }
 });
@@ -56,7 +58,7 @@ async function saveRestaurants(restaurants) {
 
   const flatValues = restaurants.flat();
   const result = await pool.query(query, flatValues);
-  return { insertedCount: result.rowCount }; // Number of new rows inserted
+  return { insertedCount: result.rowCount };
 }
 
 async function initializeDatabase() {
