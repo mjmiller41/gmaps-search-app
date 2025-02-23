@@ -1,11 +1,16 @@
 const { Pool } = require('pg');
+const fs = require('fs');
 
 const pool = new Pool({
   host: process.env.RDS_ENDPOINT,
   database: process.env.RDS_DATABASE,
   user: process.env.RDS_USER,
   password: process.env.RDS_PASSWORD,
-  port: 5432, // PostgreSQL default
+  port: 5432,
+  ssl: {
+    ca: fs.readFileSync('./rds-ca-bundle.pem').toString(),
+    rejectUnauthorized: true
+  }
 });
 
 async function getZipData() {
@@ -15,7 +20,6 @@ async function getZipData() {
   `;
   const { rows } = await pool.query(query);
 
-  // Deduplicate by lat/lon
   const coordToZips = new Map();
   rows.forEach(row => {
     const key = `${row.latitude},${row.longitude}`;
@@ -37,10 +41,16 @@ async function getZipData() {
 async function saveRestaurants(restaurants) {
   if (!restaurants.length) return;
 
+  // Generate unique placeholders for each row
+  const placeholders = restaurants.map((_, rowIndex) => {
+    const start = rowIndex * 11 + 1; // 11 fields per row
+    return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5}, $${start + 6}, $${start + 7}, $${start + 8}, $${start + 9}, $${start + 10})`;
+  }).join(',');
+
   const query = `
     INSERT INTO sushi_restaurants (
       name, housenumber, street, city, state, postcode, phone, website, opening_hours, latitude, longitude
-    ) VALUES ${restaurants.map(() => '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)').join(',')}
+    ) VALUES ${placeholders}
     ON CONFLICT DO NOTHING
   `;
 
@@ -69,4 +79,4 @@ async function initializeDatabase() {
   `);
 }
 
-module.exports = { getZipData, saveRestaurants, initializeDatabase };
+module.exports = { getZipData, saveRestaurants, initializeDatabase, pool };

@@ -118,7 +118,7 @@ This Node.js application searches for places (e.g., sushi restaurants) near US Z
 - Check `pm2 logs zipcode-search` for errors.
 - Verify RDS connectivity with:
   ```bash
-  psql -h gmap-search-db.chsm6wwis875.us-east-1.rds.amazonaws.com -U admin -d postgres
+  psql -h gmap-search-db.chsm6wwis875.us-east-1.rds.amazonaws.com -U postgres -d postgres
   ```
 - Ensure Google Maps API costs stay under $200/month via Google Cloud Console.
 

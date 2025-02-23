@@ -1,7 +1,8 @@
 const { getZipData, saveRestaurants, initializeDatabase } = require('./db');
 const { searchSushiRestaurants } = require('./searchRestaurants');
+const { pool } = require('./db'); // Add this to access the pool directly
 
-const MAX_ZIPS = 100; // -1 for all
+const MAX_ZIPS = 5; // Or -1 for full run
 
 async function startProcessing() {
   await initializeDatabase();
@@ -15,8 +16,12 @@ async function startProcessing() {
       await saveRestaurants(restaurants);
       console.log(`Saved ${restaurants.length} restaurants for coords ${coordData.lat},${coordData.lon}`);
     }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
+
+  // Add count query
+  const { rows } = await pool.query('SELECT COUNT(*) FROM sushi_restaurants');
+  console.log(`Total records in sushi_restaurants: ${rows[0].count}`);
 }
 
 module.exports = { startProcessing };
