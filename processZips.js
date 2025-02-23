@@ -2,7 +2,7 @@ const { getZipData, saveRestaurants, initializeDatabase } = require('./db');
 const { searchSushiRestaurants } = require('./searchRestaurants');
 const { pool } = require('./db'); // Add this to access the pool directly
 
-const MAX_ZIPS = 5; // Or -1 for full run
+const MAX_ZIPS = 100; // Or -1 for full run
 
 async function startProcessing() {
   await initializeDatabase();
