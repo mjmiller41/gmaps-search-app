@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 console.log('Current Dir:', process.cwd());
 console.log('RDS_CA_PATH:', process.env.RDS_CA_PATH);
 const { startProcessing } = require('./processZips');
