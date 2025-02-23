@@ -11,7 +11,7 @@ function logError(message) {
   console.error(`[${timestamp}] ERROR: ${message}`);
 }
 
-const MAX_ZIPS = 5;
+const MAX_ZIPS = -1;
 
 async function startProcessing() {
   log('Starting sushi restaurant search...');
