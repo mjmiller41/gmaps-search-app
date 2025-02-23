@@ -1,16 +1,14 @@
 const { getZipData, saveRestaurants, initializeDatabase, pool } = require('./db');
 const { searchSushiRestaurants } = require('./searchRestaurants');
 
-// Custom log function with timestamp
 function log(message) {
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${message}`); // PM2 captures this
+  console.log(`[${timestamp}] ${message}`);
 }
 
-// Error logging (optional)
 function logError(message) {
   const timestamp = new Date().toISOString();
-  console.error(`[${timestamp}] ERROR: ${message}`); // Goes to PM2 error log
+  console.error(`[${timestamp}] ERROR: ${message}`);
 }
 
 const MAX_ZIPS = 100;
@@ -20,14 +18,18 @@ async function startProcessing() {
   await initializeDatabase();
   const coordsWithZips = await getZipData();
   const limitedCoords = MAX_ZIPS === -1 ? coordsWithZips : coordsWithZips.slice(0, MAX_ZIPS);
+  let totalNewRecords = 0; // Track total new inserts
 
   for (const coordData of limitedCoords) {
     log(`Searching coords ${coordData.lat},${coordData.lon} (zips: ${coordData.zips.join(', ')}, pop: ${coordData.population})...`);
     try {
       const restaurants = await searchSushiRestaurants(coordData);
       if (restaurants.length) {
-        await saveRestaurants(restaurants);
-        log(`Saved ${restaurants.length} restaurants for coords ${coordData.lat},${coordData.lon}`);
+        const { insertedCount } = await saveRestaurants(restaurants);
+        totalNewRecords += insertedCount; // Accumulate new records
+        log(`Found ${restaurants.length} restaurants, inserted ${insertedCount} new records for coords ${coordData.lat},${coordData.lon}`);
+      } else {
+        log(`No restaurants found for coords ${coordData.lat},${coordData.lon}`);
       }
     } catch (error) {
       logError(`Failed for coords ${coordData.lat},${coordData.lon}: ${error.message}`);
@@ -37,6 +39,7 @@ async function startProcessing() {
 
   const { rows } = await pool.query('SELECT COUNT(*) FROM sushi_restaurants');
   log(`Total records in sushi_restaurants: ${rows[0].count}`);
+  log(`Total new records inserted this run: ${totalNewRecords}`);
   log('Process completed successfully.');
 }
 

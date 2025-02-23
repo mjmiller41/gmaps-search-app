@@ -39,11 +39,10 @@ async function getZipData() {
 }
 
 async function saveRestaurants(restaurants) {
-  if (!restaurants.length) return;
+  if (!restaurants.length) return { insertedCount: 0 };
 
-  // Generate unique placeholders for each row
   const placeholders = restaurants.map((_, rowIndex) => {
-    const start = rowIndex * 11 + 1; // 11 fields per row
+    const start = rowIndex * 11 + 1;
     return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5}, $${start + 6}, $${start + 7}, $${start + 8}, $${start + 9}, $${start + 10})`;
   }).join(',');
 
@@ -52,10 +51,12 @@ async function saveRestaurants(restaurants) {
       name, housenumber, street, city, state, postcode, phone, website, opening_hours, latitude, longitude
     ) VALUES ${placeholders}
     ON CONFLICT DO NOTHING
+    RETURNING id
   `;
 
   const flatValues = restaurants.flat();
-  await pool.query(query, flatValues);
+  const result = await pool.query(query, flatValues);
+  return { insertedCount: result.rowCount }; // Number of new rows inserted
 }
 
 async function initializeDatabase() {
@@ -74,7 +75,6 @@ async function initializeDatabase() {
       latitude DECIMAL(10,6),
       longitude DECIMAL(10,6),
       UNIQUE (name, latitude, longitude)
-      -- Add scraped fields later, e.g., rating DECIMAL(2,1), review_count INTEGER
     )
   `);
 }
