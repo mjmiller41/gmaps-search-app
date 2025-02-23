@@ -1,7 +1,7 @@
 const { getZipData, saveRestaurants, initializeDatabase } = require('./db');
 const { searchSushiRestaurants } = require('./searchRestaurants');
 
-const MAX_ZIPS = -1; // -1 for all
+const MAX_ZIPS = 100; // -1 for all
 
 async function startProcessing() {
   await initializeDatabase();
